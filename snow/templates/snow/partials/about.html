@@ -1,0 +1,328 @@
+{% extends 'snow/base.html' %}
+{% load static %}
+
+{% block title %}About Us | Snow Beauty{% endblock %}
+
+{% block content %}
+
+<style>
+  body {
+    font-family: "Poppins", sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    color: #333;
+  }
+
+  /* --- About Content --- */
+  .about-us-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    align-items: center;
+    gap: 40px;
+    padding: 60px 8%;
+  }
+
+  .about-us-content h2 {
+    color: #3b3b98;
+    font-weight: 700;
+    margin-bottom: 15px;
+  }
+
+  .about-us-content p {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: #444;
+  }
+
+  .about-us-content img {
+    width: 100%;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  /* --- Mission & Vision --- */
+  #snow {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    text-align: center;
+    padding: 80px 8%;
+    background-color: #f8f9fa;
+  }
+
+  #target {
+    background: white;
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+  }
+
+  #target:hover {
+    transform: translateY(-5px);
+  }
+
+  #target h1 {
+    color: #3b3b98;
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+  }
+
+  #target p {
+    color: #555;
+    line-height: 1.6;
+  }
+  /* --- Hero Section --- */
+  .about-us-hero-section {
+    position: relative;
+    height: 75vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    overflow: hidden;
+  }
+
+  /* Background Slideshow */
+  .about-us-hero-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    animation: slideShow 24s infinite;
+    z-index: 1;
+  }
+
+  /* Dark Overlay */
+  .about-us-hero-section::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(rgba(7, 7, 7, 0.6), rgba(59, 59, 152, 0.7));
+    z-index: 2;
+  }
+
+  /* Hero Text */
+  .about-hero-text {
+    position: relative;
+    z-index: 3;
+    padding: 0 20px;
+    animation: fadeInUp 1.2s ease-in-out;
+  }
+
+  .about-hero-text h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    letter-spacing: 1px;
+  }
+
+  .about-hero-text p {
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: #f1f1f1;
+  }
+
+  /* Background slideshow animation */
+  @keyframes slideShow {
+    0% {
+      background-image: url("{% static 'image/about.jpg' %}");
+    }
+    25% {
+      background-image: url("{% static 'image/abt.jpg' %}");
+    }
+    50% {
+      background-image: url("{% static 'image/massages.jpg' %}");
+    }
+    75% {
+      background-image: url("{% static 'image/facial.jpg' %}");
+    }
+    100% {
+      background-image: url("{% static 'image/about.jpg' %}");
+    }
+  }
+
+  /* Text Animation */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* --- Responsive --- */
+  @media (max-width: 768px) {
+    .about-us-hero-section {
+      height: 60vh;
+      background-attachment: scroll; /* prevent mobile glitch */
+    }
+
+    .about-us-hero-section::before {
+      background-attachment: scroll;
+      animation: slideShow 24s infinite;
+    }
+
+    .about-hero-text h1 {
+      font-size: 2rem;
+    }
+
+    .about-hero-text p {
+      font-size: 1rem;
+    }
+  }
+</style>
+
+<!-- Hero Section -->
+<section class="about-us-hero-section">
+  <div class="about-hero-text">
+    <h1>About Us</h1>
+    <p>Get to know Snow Beauty better</p>
+  </div>
+</section>
+<!-- About Content -->
+<section class="about-us-container">
+  <div class="about-us-content">
+    <h2>Snow Beauty Unisex Salon</h2>
+    <p>
+      Snow Beauty Unisex Salon is a cutting-edge beauty and training center owned by five dedicated entrepreneurs. Officially opening its doors on November 22, 2024, the salon has already made a significant impact in the industry.
+      <br><br>
+      <strong>Services and Training:</strong><br>
+      We offer a wide range of beauty services, including haircuts, styling, makeup, nail care, waxing, and threading. Our center also provides training programs for aspiring beauty professionals.
+      <br><br>
+      <strong>Digitalization Plans:</strong><br>
+      Snow Beauty is planning to digitalize its services to offer online booking, virtual consultations, and other conveniences.
+    </p>
+  </div>
+
+  <div class="about-us-content">
+    <h2 class="fw-bold text-dark text-center mb-4">Our Services</h2>
+    <p class="text-muted text-center mb-4">
+      Explore our wide range of beauty treatments and styling options for men and women.
+    </p>
+
+    <!-- Carousel with One Item per Slide -->
+    <div id="servicesCarousel" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-inner">
+
+        <!-- Haircut -->
+        <div class="carousel-item active text-center">
+          <div class="service-card p-4 shadow-sm rounded mx-auto" style="max-width: 300px;">
+            <img src="{% static 'image/cut.jpg' %}" width="80" class="mb-3 rounded-circle">
+            <h5 class="fw-semibold mb-2">Haircut</h5>
+            <p class="text-muted" style="font-size: 0.9rem;">Professional haircuts tailored to your style.</p>
+          </div>
+        </div>
+
+        <!-- Styling -->
+        <div class="carousel-item text-center">
+          <div class="service-card p-4 shadow-sm rounded mx-auto" style="max-width: 300px;">
+            <img src="{% static 'image/contact.jpg' %}" width="80" class="mb-3 rounded-circle">
+            <h5 class="fw-semibold mb-2">Styling</h5>
+            <p class="text-muted" style="font-size: 0.9rem;">Modern hairstyles and blowouts for all occasions.</p>
+          </div>
+        </div>
+
+        <!-- Facials -->
+        <div class="carousel-item text-center">
+          <div class="service-card p-4 shadow-sm rounded mx-auto" style="max-width: 300px;">
+            <img src="{% static 'image/facial.jpg' %}" width="80" class="mb-3 rounded-circle">
+            <h5 class="fw-semibold mb-2">Facials</h5>
+            <p class="text-muted" style="font-size: 0.9rem;">Relaxing facials to rejuvenate your skin.</p>
+          </div>
+        </div>
+
+        <!-- Massage -->
+        <div class="carousel-item text-center">
+          <div class="service-card p-4 shadow-sm rounded mx-auto" style="max-width: 300px;">
+            <img src="{% static 'image/massages.jpg' %}" width="80" class="mb-3 rounded-circle">
+            <h5 class="fw-semibold mb-2">Massage</h5>
+            <p class="text-muted" style="font-size: 0.9rem;">Professional massage therapy to relax muscles.</p>
+          </div>
+        </div>
+
+        <!-- Hair Coloring -->
+        <div class="carousel-item text-center">
+          <div class="service-card p-4 shadow-sm rounded mx-auto" style="max-width: 300px;">
+            <img src="{% static 'image/coloring.jpg' %}" width="80" class="mb-3 rounded-circle">
+            <h5 class="fw-semibold mb-2">Hair Coloring</h5>
+            <p class="text-muted" style="font-size: 0.9rem;">Expert coloring, highlights, and balayage treatments.</p>
+          </div>
+        </div>
+
+        <!-- Makeup -->
+        <div class="carousel-item text-center">
+          <div class="service-card p-4 shadow-sm rounded mx-auto" style="max-width: 300px;">
+            <img src="{% static 'image/make-up.jpg' %}" width="80" class="mb-3 rounded-circle">
+            <h5 class="fw-semibold mb-2">Makeup</h5>
+            <p class="text-muted" style="font-size: 0.9rem;">Professional makeup for events and daily looks.</p>
+          </div>
+        </div>
+
+        <!-- Nail -->
+        <div class="carousel-item text-center">
+          <div class="service-card p-4 shadow-sm rounded mx-auto" style="max-width: 300px;">
+            <img src="{% static 'image/nail.jpg' %}" width="80" class="mb-3 rounded-circle">
+            <h5 class="fw-semibold mb-2">Nail</h5>
+            <p class="text-muted" style="font-size: 0.9rem;">Manicure and pedicure services for all occasions.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Carousel Controls -->
+      <button class="carousel-control-prev" type="button" data-bs-target="#servicesCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#servicesCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon bg-dark rounded-circle p-2" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- Next Section: Image Left, Text Right -->
+<section class="py-5" style="padding: 60px 8%;">
+  <div class="row align-items-center">
+    <div class="col-md-6 mb-4 mb-md-0">
+      <img src="{% static 'image/abt.jpg' %}" alt="About Snow Beauty" class="img-fluid rounded shadow">
+    </div>
+    <div class="col-md-6">
+      <p>
+        <strong>Milestones:</strong><br>
+        • November 22, 2024 – Official opening<br>
+        • 2024 – Wins Wezesha Award as a side capital
+        <br><br>
+        <strong>Ownership:</strong><br>
+        Proudly owned by five entrepreneurs passionate about beauty, innovation, and excellence.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Mission and Vision -->
+<section id="snow">
+  <div id="target">
+    <h1>Our Mission</h1>
+    <p>
+      Snow Beauty Unisex Salon’s mission is to reduce youth unemployment in Kampala and empower 500 youth by 2030 through skill-building in the beauty industry.
+    </p>
+  </div>
+  <div id="target">
+    <h1>Our Vision</h1>
+    <p>
+      To create sustainable employment opportunities by upskilling young people in the beauty industry and making beauty services more accessible to all.
+    </p>
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,156 @@
+    <!-- Form -->
+    <div class="card p-4 shadow" style="max-width: 600px; width: 100%;">
+        <h3 class="text-center mb-4" id="form-title">Add User</h3>
+
+        <form id="user-form" method="post" action="{% url 'register' %}">
+            {% csrf_token %}
+            <input type="hidden" name="user_id" id="user_id" value="">
+
+            <!-- Common fields -->
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" class="form-control" placeholder="Username" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-control" placeholder="Email" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input type="password" name="password1" class="form-control" placeholder="Password">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Confirm Password</label>
+                <input type="password" name="password2" class="form-control" placeholder="Confirm Password">
+            </div>
+
+            <!-- Role selection hidden -->
+            <input type="hidden" name="role" id="role" value="user">
+
+            <!-- Salon / Shop fields -->
+            <div class="role-fields" id="salon-fields" style="display:none;">
+                <div class="mb-3">
+                    <label class="form-label">Business Name</label>
+                    <input type="text" name="salon_name" class="form-control" placeholder="Business Name">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Business Address</label>
+                    <input type="text" name="salon_address" class="form-control" placeholder="Business Address">
+                </div>
+            </div>
+
+            <!-- Provider fields -->
+            <div class="role-fields" id="provider-fields" style="display:none;">
+                <div class="mb-3">
+                    <label class="form-label">Address</label>
+                    <input type="text" name="provider_address" class="form-control" placeholder="Enter your address">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Services You Offer</label>
+                    {% for key, label in Service.SERVICE_TYPES %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="service_types" value="{{ key }}" id="service-{{ key }}">
+                        <label class="form-check-label" for="service-{{ key }}">{{ label }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <button type="submit" class="btn btn-primary w-100" id="submit-btn">Add User</button>
+            <button type="button" class="btn btn-secondary w-100 mt-2" id="cancel-edit" style="display:none;">Cancel Edit</button>
+        </form>
+    </div>
+</div>
+
+
+<!-- Users Table -->
+<div id="users-section" class="mt-4">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="users-table-body">
+            {% include 'snow/partials/users_table_body.html' %}
+        </tbody>
+    </table>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const menuItems = document.querySelectorAll('#role-menu li');
+    const roleInput = document.getElementById('role');
+    const fields = document.querySelectorAll('.role-fields');
+    const formTitle = document.getElementById('form-title');
+    const submitBtn = document.getElementById('submit-btn');
+    const cancelBtn = document.getElementById('cancel-edit');
+    const userForm = document.getElementById('user-form');
+
+    function showFieldsForRole(role) {
+        fields.forEach(f => f.style.display = 'none');
+        if(role === 'salon' || role === 'shop') {
+            document.getElementById('salon-fields').style.display = 'block';
+        } else if(role === 'provider') {
+            document.getElementById('provider-fields').style.display = 'block';
+        }
+    }
+
+    // Sidebar role click
+    menuItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const selectedRole = this.getAttribute('data-role');
+            roleInput.value = selectedRole;
+            showFieldsForRole(selectedRole);
+        });
+    });
+
+    // Default role
+    menuItems[0].click();
+
+    // Function to load user data for editing
+    window.loadUserForEdit = function(user) {
+        // Set hidden user_id
+        document.getElementById('user_id').value = user.id;
+        // Update title and button
+        formTitle.textContent = 'Edit User';
+        submitBtn.textContent = 'Update User';
+        cancelBtn.style.display = 'block';
+
+        // Fill common fields
+        userForm.querySelector('input[name="username"]').value = user.username;
+        userForm.querySelector('input[name="email"]').value = user.email;
+
+        // Password fields left blank for security
+
+        // Set role
+        roleInput.value = user.role;
+        showFieldsForRole(user.role);
+
+        // Fill role-specific fields
+        if(user.role === 'salon' || user.role === 'shop') {
+          userForm.querySelector('input[name="salon_name"]').value = user.salon_name || '';
+          userForm.querySelector('input[name="salon_address"]').value = user.salon_address || '';
+        } else if(user.role === 'provider') {
+           userForm.querySelector('input[name="provider_address"]').value = user.provider_address || '';
+            // Reset services checkboxes
+            const checkboxes = document.querySelectorAll('input[name="service_types"]');
+            checkboxes.forEach(cb => cb.checked = user.services?.includes(cb.value) || false);
+        }
+    }
+py
+    // Cancel editing
+    cancelBtn.addEventListener('click', function() {
+        userForm.reset();
+        document.getElementById('user_id').value = '';
+        formTitle.textContent = 'Add User';
+        submitBtn.textContent = 'Add User';
+        cancelBtn.style.display = 'none';
+        menuItems[0].click();
+    });
+});
+</script>

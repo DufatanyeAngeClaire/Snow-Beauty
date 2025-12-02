@@ -1,0 +1,26 @@
+<div style="min-width:220px;">
+  <h6>{{ salon.name }}</h6>
+  <p><strong>Address:</strong> {{ salon.address }}</p>
+  {% if services %}
+    <hr>
+    <strong>Services:</strong>
+    <ul style="margin:0; padding-left:15px;">
+      {% for s in services %}
+        <li>{{ s.name }} - {{ s.price }} UGX
+            <a href="{% url 'book_service' s.id %}" target="_blank" style="color:blue;">Book</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {% if products %}
+    <hr>
+    <strong>Products:</strong>
+    <ul style="margin:0; padding-left:15px;">
+      {% for p in products %}
+        <li>{{ p.name }} - {{ p.price }} UGX
+            <a href="{% url 'product_detail' p.id %}" target="_blank" style="color:green;">View</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+</div>

@@ -1,0 +1,160 @@
+<!-- Service Form -->
+<button id="add-service-btn" class="btn btn-primary mb-3">Add Service</button>
+
+<hr>
+<!-- Services Table -->
+<div id="services-section">
+    <table class="table table-bordered mt-4">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Salon</th>
+                <th>Price</th>
+                <th>Featured</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for service in services %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{% if service.image %}<img src="{{ service.image.url }}" width="60">{% else %}—{% endif %}</td>
+                <td>{{ service.name }}</td>
+                <td>{{ service.get_service_type_display }}</td>
+                <td>{{ service.salon.name }}</td>
+                <td>{{ service.price }}</td>
+                <td>{{ service.featured|yesno:"Yes,No" }}</td>
+          <td>
+    <a href="{% url 'owner_edit_service' service.id %}" class="edit-add-service-form-btn" data-id="{{ service.id }}">Edit</a>
+    <button class="btn btn-sm btn-danger delete-add-service-form-btn" data-id="{{ service.id }}">Delete</button>
+</td>
+
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="text-center">No services</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+const SERVICES_BASE_URL = "{% if user.role == 'admin' %}/admin/services{% else %}/owner/services{% endif %}";
+
+document.querySelectorAll('.edit-add-service-form-btn').forEach(btn => {
+    btn.addEventListener('click', async function(e) {
+        e.preventDefault();  // STOP <a> FROM NAVIGATING
+
+        const id = this.dataset.id;
+        const response = await fetch(`${SERVICES_BASE_URL}/edit/${id}/`, {
+            method: "GET",
+            credentials: "include",
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        });
+
+        const data = await response.json();
+
+        document.querySelector('#id_name').value = data.name;
+        document.querySelector('#id_price').value = data.price;
+        document.querySelector('#id_duration_minutes').value = data.duration_minutes;
+        document.querySelector('#id_service_type').value = data.service_type;
+        document.querySelector('#id_featured').checked = data.featured;
+
+        const serviceForm = document.getElementById('add-service-form');
+        serviceForm.dataset.id = id;
+
+        document.getElementById('service-submit-btn').innerText = "Save Changes";
+        document.getElementById('service-cancel-btn').classList.remove('d-none');
+    });
+});
+
+
+    serviceForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(serviceForm);
+        const id = serviceForm.dataset.id || '';
+        const url = id ? `${SERVICES_BASE_URL}/edit/${id}/` : `${SERVICES_BASE_URL}/add/`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            credentials: "include",
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            body: formData
+        });
+        const data = await response.json();
+
+        if (data.html) {
+            document.getElementById('services-section').outerHTML = data.html;
+            bindServiceFunctions();
+        } else if (data.error) {
+            errorDiv.innerHTML = '';
+            for (const [field, messages] of Object.entries(data.error)) {
+                errorDiv.innerHTML += `<strong>${field}:</strong> ${messages.join(', ')}<br>`;
+            }
+        }
+
+        serviceForm.reset();
+        delete serviceForm.dataset.id;
+        submitBtn.innerText = "Add Service";
+        cancelBtn.classList.add('d-none');
+    });
+
+    cancelBtn.addEventListener('click', function() {
+        serviceForm.reset();
+        delete serviceForm.dataset.id;
+        submitBtn.innerText = "Add Service";
+        cancelBtn.classList.add('d-none');
+    });
+
+function bindServiceFunctions() {
+    // Edit
+    document.querySelectorAll('.edit-add-service-form-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const id = this.dataset.id;
+            const response = await fetch(`${SERVICES_BASE_URL}/edit/${id}/`, {
+                method: "GET",
+                credentials: "include",
+                headers: { "X-Requested-With": "XMLHttpRequest" }
+            });
+            const data = await response.json();
+
+            document.querySelector('#id_name').value = data.name;
+            document.querySelector('#id_price').value = data.price;
+            document.querySelector('#id_duration_minutes').value = data.duration_minutes;
+            document.querySelector('#id_service_type').value = data.service_type;
+            document.querySelector('#id_featured').checked = data.featured;
+
+            const serviceForm = document.getElementById('add-service-form');
+            serviceForm.dataset.id = id;
+
+            document.getElementById('service-submit-btn').innerText = "Save Changes";
+            document.getElementById('service-cancel-btn').classList.remove('d-none');
+        });
+    });
+
+    // Delete
+    document.querySelectorAll('.delete-add-service-form-btn').forEach(btn => {
+        btn.addEventListener('click', async function() {
+            const id = this.dataset.id;
+            if (!confirm("Are you sure you want to delete this service?")) return;
+
+            const response = await fetch(`${SERVICES_BASE_URL}/delete/${id}/`, {
+                method: 'POST',
+                credentials: "include",
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            });
+            const data = await response.json();
+            if (data.html) {
+                document.getElementById('services-section').outerHTML = data.html;
+                bindServiceFunctions();
+            }
+        });
+    });
+}
+</script>
+

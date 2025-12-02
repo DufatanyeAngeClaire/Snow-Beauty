@@ -1,0 +1,11 @@
+<h2>Pending Users</h2>
+<ul>
+    {% for u in pending_users %}
+        <li>
+            {{ u.username }} ({{ u.get_role_display }}) 
+            <a href="{% url 'approve_user' u.id %}">Approve</a>
+        </li>
+    {% empty %}
+        <li>No pending users.</li>
+    {% endfor %}
+</ul>

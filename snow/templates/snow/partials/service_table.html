@@ -1,0 +1,35 @@
+<div id="services-section">
+    <table class="table table-bordered mt-4">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Salon</th>
+                <th>Price</th>
+                <th>Featured</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for service in services %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{% if service.image %}<img src="{{ service.image.url }}" width="60">{% else %}—{% endif %}</td>
+                <td>{{ service.name }}</td>
+                <td>{{ service.get_service_type_display }}</td>
+                <td>{{ service.salon.name }}</td>
+                <td>{{ service.price }}</td>
+                <td>{{ service.featured|yesno:"Yes,No" }}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning edit-add-service-form-btn" data-id="{{ service.id }}">Edit</button>
+                    <button class="btn btn-sm btn-danger delete-add-service-form-btn" data-id="{{ service.id }}">Delete</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="8" class="text-center">No services</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

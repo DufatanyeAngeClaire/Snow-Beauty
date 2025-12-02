@@ -1,0 +1,244 @@
+{% extends 'snow/base.html' %}
+{% load static %}
+
+{% block title %}Contact Us - Snow Beauty{% endblock %}
+
+{% block content %}
+<style>
+    /* Hero Section */
+    .hero-contact-us {
+        height: 400px;
+        background-image: url("{% static 'image/contact.jpg' %}");
+        background-repeat: no-repeat;
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: white;
+        position: relative;
+    }
+    .hero-contact-us::after {
+        content: "";
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+    }
+    .hero-contact-us-text {
+        position: relative;
+        z-index: 2;
+    }
+    .hero-contact-us button {
+        margin-top: 15px;
+        padding: 10px 25px;
+        font-size: 16px;
+        border: none;
+        background-color: #6f42c1;
+        color: #fff;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    /* Contact Cards */
+    .contact-card {
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        background: #fff;
+        margin-bottom: 20px;
+    }
+    .contact-card p {
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+    .contact-card table {
+        margin-top: 15px;
+    }
+
+    /* Map & Why Us Section */
+    .map-container {
+        width: 100%;
+        height: 450px;
+        border-radius: 12px;
+    }
+    .why-us {
+        background: #f9f9ff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+    .why-us ul {
+        list-style: none;
+        padding: 0;
+        margin: 15px 0 0 0;
+    }
+    .why-us ul li {
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+  .fade-down {
+        opacity: 0;
+        transform: translateY(-40px); /* move up initially */
+        transition: all 0.8s ease-out;
+    }
+
+    .fade-down.visible {
+        opacity: 1;
+        transform: translateY(0); /* move to natural position */
+    }
+</style>
+
+<!-- Hero Section -->
+<div class="hero-contact-us">
+    <div class="hero-contact-us-text">
+        <h3>Get In Touch With Us</h3>
+        <p>Are you a salon owner? Join us and become part of our growing network.</p>
+        <button>Join Us</button>
+    </div>
+</div>
+
+<!-- Contact Info + Form -->
+<section class="container py-5">
+    <div class="row g-4">
+        <!-- Contact Info -->
+        <div class="col-md-6">
+            <div class="contact-card">
+                <h2 class="heading">Contact Information</h2>
+                <p><i class="fa-solid fa-phone"></i> <strong>Phone:</strong> +256 759 8722798 / +256 760 743113</p>
+                <p><i class="fa-solid fa-envelope"></i> <strong>Email:</strong> snowbeautyenterprise@gmail.com</p>
+                <p><i class="fa-solid fa-location-dot"></i> <strong>Address:</strong> Nankulabye, Kampala, Uganda</p>
+                <p><i class="fa-brands fa-facebook"></i> Facebook: snowbeauty</p>
+
+                <h2 class="heading mt-4">Working Hours</h2>
+                <table class="table table-bordered">
+                    <tr><th>Day</th><th>Opening</th><th>Closing</th></tr>
+                    {% for day in working_days %}
+                    <tr><td>{{ day }}</td><td>7:00 AM</td><td>10:00 PM</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <!-- Send Message Form -->
+        <div class="col-md-6">
+            <div class="contact-card">
+                <h2 class="heading">Send Us a Message</h2>
+                <form action="{% url 'contact' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label>Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Email</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Phone</label>
+                        <input type="text" name="phone" class="form-control">
+                    </div>
+                    <div class="mb-3">
+                        <label>Message</label>
+                        <textarea name="message" rows="5" class="form-control"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- MAP + Why Us Section -->
+<section class="container">
+    <div class="row g-4 align-items-start">
+        <!-- Map -->
+        <div class="col-md-6">
+            <h2 class="heading">Our Location</h2><br>
+            <div id="map" class="map-container"></div>
+        </div>
+
+        <!-- Why Us -->
+        <div class="col-md-6 d-flex align-items-stretch " style="margin-top: 100px;">
+    <div class="why-us fade-down">
+        <h2>Why Choose Snow Beauty?</h2>
+        <p>We provide professional, affordable, and convenient salon services with a friendly touch.</p>
+        <ul>
+            <li>💜 Expert Stylists</li>
+            <li>💜 Clean & Relaxing Spaces</li>
+            <li>💜 Affordable Packages</li>
+            <li>💜 Multiple Partner Locations</li>
+        </ul>
+    </div>
+</div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Fade Up Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const fadeUpElements = document.querySelectorAll('.fade-down');
+
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.2 });
+
+        fadeUpElements.forEach(el => observer.observe(el));
+    });
+</script>
+
+<!-- MAP SCRIPT -->
+<script>
+    const partners = JSON.parse('{{ salons_json|escapejs }}');
+
+    function initMap() {
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 12,
+            center: { lat: 0.3476, lng: 32.5825 },
+        });
+
+        const bounds = new google.maps.LatLngBounds();
+
+        partners.forEach(item => {
+            const pos = { lat: item.lat, lng: item.lng };
+            bounds.extend(pos);
+
+            const marker = new google.maps.Marker({
+                position: pos,
+                map: map,
+                title: item.name,
+                icon: item.role === 'provider' ? 'http://maps.google.com/mapfiles/ms/icons/green-dot.png' :
+                      item.role === 'shop' ? 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png' :
+                      'http://maps.google.com/mapfiles/ms/icons/purple-dot.png'
+            });
+
+            const infoWindow = new google.maps.InfoWindow({ content: '<p>Loading...</p>' });
+
+            marker.addListener("click", () => {
+                infoWindow.open(map, marker);
+                fetch(`/salon/${item.id}/details/`)
+                    .then(res => res.json())
+                    .then(data => infoWindow.setContent(data.html))
+                    .catch(() => infoWindow.setContent('<p>Failed to load details.</p>'));
+            });
+        });
+
+        map.fitBounds(bounds);
+    }
+</script>
+
+
+<!-- Google Maps API -->
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCxoXJB8aGLMuAnu8htltLpElDyjHI3tqI&callback=initMap">
+</script>
+{% endblock %}

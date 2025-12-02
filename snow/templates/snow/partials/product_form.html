@@ -1,0 +1,16 @@
+<form method="post" id="{% if form.instance.pk %}edit-product-form{% else %}add-product-form{% endif %}" enctype="multipart/form-data" data-id="{{ form.instance.pk|default:'' }}">
+    {% csrf_token %}
+    <div id="product-form-errors" class="text-danger mb-3"></div>
+
+    {{ form.as_p }}
+
+    <button type="submit" class="btn btn-primary">
+        {% if form.instance.pk %}Update Product{% else %}Add Product{% endif %}
+    </button>
+
+    {% if form.instance.image %}
+        <img id="product-preview-image" style="max-width:100px; display:block; margin-top:10px;" src="{{ form.instance.image.url }}" alt="Preview">
+    {% else %}
+        <img id="product-preview-image" style="max-width:100px; display:block; margin-top:10px; display:none;" src="" alt="Preview">
+    {% endif %}
+</form>

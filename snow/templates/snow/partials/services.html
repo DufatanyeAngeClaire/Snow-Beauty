@@ -1,0 +1,89 @@
+{% extends 'snow/base.html' %}
+{% load static %}
+
+{% block title %}Our Services - Snow Beauty{% endblock %}
+
+{% block content %}
+<style>
+  html {
+    scroll-behavior: smooth;
+  }
+  .service-nav {
+    position: sticky;
+    top: 80px;
+    background-color: #fff;
+    z-index: 1000;
+    border-bottom: 2px solid #eee;
+    padding: 10px 0;
+  }
+  .service-nav a {
+    text-decoration: none;
+    margin: 0 10px;
+    color: #6f42c1;
+    font-weight: 600;
+    transition: color 0.3s ease;
+  }
+  .service-nav a:hover {
+    color: #3b236a;
+  }
+  section {
+    padding: 60px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  section h2 {
+    color: #6f42c1;
+    font-weight: 700;
+  }
+</style>
+
+<div class="container py-5">
+  <h1 class="text-center mb-4 text-purple">Our Services</h1>
+
+  <!-- Sticky Navigation -->
+  <div class="service-nav text-center mb-4">
+    {% for key, label in service_types %}
+      <a href="#{{ label|slugify }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  <!-- Service Sections -->
+  {% for section_name, services in grouped_services.items %}
+  <section id="{{ section_name|slugify }}">
+    <h2 class="text-center text-capitalize mb-4">{{ section_name }}</h2>
+
+    {% if services %}
+      <div class="row">
+        {% for service in services %}
+          <div class="col-md-4 mb-3">
+            <div class="card shadow-sm p-3 border-0 h-100">
+              {% if service.image %}
+                <img src="{{ service.image.url }}" class="card-img-top mb-2" alt="{{ service.name }}" style="height:200px; object-fit:cover;">
+              {% else %}
+                <div class="bg-light text-center mb-2" style="height:200px; display:flex; align-items:center; justify-content:center; color:#aaa;">
+                  No Image
+                </div>
+              {% endif %}
+              <div class="card-body text-center">
+                <h5 class="text-purple">{{ service.name }}</h5>
+                <p><strong>Price:</strong> UGX {{ service.price }}</p>
+                <p><strong>Duration:</strong> {{ service.duration_minutes }} mins</p>
+                {% if service.promotion %}
+                  <p class="text-success"><strong>Promo:</strong> {{ service.promotion }}</p>
+                {% endif %}
+
+                <!-- Book Now Button -->
+                <a href="{% url 'book_service' service.id %}" class="btn btn-outline-primary mt-2">
+                  <i class="fa fa-calendar"></i> Book Now
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted text-center">No {{ section_name|lower }} services available yet.</p>
+    {% endif %}
+  </section>
+  {% endfor %}
+</div>
+{% endblock %}

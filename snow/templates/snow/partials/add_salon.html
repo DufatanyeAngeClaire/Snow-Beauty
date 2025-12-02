@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>
+        {% if request.user.is_superuser %}
+            Add Salon (Admin)
+        {% else %}
+            Register Your Salon
+        {% endif %}
+    </h2>
+
+    <form method="POST" class="mt-3">
+        {% csrf_token %}
+
+        <!-- Salon fields (name, address, rating, lat/lng) -->
+        <div class="mb-3">
+            {{ form.name.label_tag }}
+            {{ form.name }}
+            {% for error in form.name.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.address.label_tag }}
+            {{ form.address }}
+            {% for error in form.address.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.rating.label_tag }}
+            {{ form.rating }}
+            {% for error in form.rating.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.latitude.label_tag }}
+            {{ form.latitude }}
+            {% for error in form.latitude.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.longitude.label_tag }}
+            {{ form.longitude }}
+            {% for error in form.longitude.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Only show owner fields for regular users -->
+        {% if not request.user.is_superuser %}
+            <h5 class="mt-4">Owner Account Details</h5>
+            <div class="mb-3">
+                {{ form.owner_username.label_tag }}
+                {{ form.owner_username }}
+                {% for error in form.owner_username.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-3">
+                {{ form.owner_email.label_tag }}
+                {{ form.owner_email }}
+                {% for error in form.owner_email.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-3">
+                {{ form.owner_password.label_tag }}
+                {{ form.owner_password }}
+                {% for error in form.owner_password.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <button type="submit" class="btn btn-primary mt-3">
+            {% if request.user.is_superuser %}
+                Add Salon
+            {% else %}
+                Submit for Approval
+            {% endif %}
+        </button>
+    </form>
+</div>
+{% endblock %}

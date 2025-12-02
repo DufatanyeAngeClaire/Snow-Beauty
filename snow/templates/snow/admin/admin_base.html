@@ -1,0 +1,183 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <style>
+        #sidebarMenu {
+            position: relative;
+            z-index: 1000;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+            <div class="position-sticky pt-3">
+                <ul class="nav flex-column">
+
+                    <!-- Dashboard -->
+                    <li class="nav-item mb-2">
+                        <a class="nav-link active load-page" href="#" data-url="{% url 'admin_dashboard' %}">
+                            <span data-feather="home"></span> Dashboard
+                        </a>
+                    </li>
+
+                    <!-- Users with submenu -->
+                    <li class="nav-item mb-2">
+                        <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#usersSubmenu" role="button" aria-expanded="false" aria-controls="usersSubmenu">
+                            <span data-feather="users"></span> Users
+                            <span data-feather="chevron-down"></span>
+                        </a>
+                        <div class="collapse" id="usersSubmenu">
+                            <ul class="btn-toggle-nav list-unstyled fw-normal pb-1 small">
+                                {% for key, label in roles %}
+                                <li>
+    <a class="nav-link load-users-role ps-4" href="#" data-role="{{ key }}">
+        {{ label }}
+    </a>
+</li>
+
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </li>
+
+ <!-- Services -->
+<li class="nav-item mb-2">
+    {% if user.role == "admin" %}
+        <a class="nav-link load-page" href="#" data-url="{% url 'services_list' %}">
+            <span data-feather="shopping-cart"></span> Services
+        </a>
+    {% elif user.role == "salon" %}
+        <a class="nav-link load-page" href="#" data-url="{% url 'owner_dashboard' %}?page=services">
+            <span data-feather="shopping-cart"></span> My Services
+        </a>
+    {% endif %}
+</li>
+
+
+
+
+                    <!-- Products -->
+                    <li class="nav-item mb-2">
+                        <a class="nav-link load-page" href="#" data-url="{% url 'products_list' %}">
+                            <span data-feather="box"></span> Products
+                        </a>
+                    </li>
+
+                    <!-- Appointments -->
+                    <li class="nav-item mb-2">
+                        <a class="nav-link load-page" href="#" data-url="{% url 'appointments_list' %}">
+                            <span data-feather="calendar"></span> Appointments
+                        </a>
+                    </li>
+
+                    <!-- Logout -->
+                    <li class="nav-item mb-2">
+                        <a class="nav-link text-danger" href="{% url 'logout' %}">
+                            <span data-feather="log-out"></span> Logout
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="col-md-9 col-lg-10 px-md-3" id="main-content">
+            {% block content %}
+            <h2 class="text-center py-5">Welcome to Admin Dashboard</h2>
+            {% endblock %}
+        </main>
+    </div>
+</div>
+
+<script src="https://unpkg.com/feather-icons"></script>
+<script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<script>
+    // Initialize feather icons
+    feather.replace();
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const mainContent = document.getElementById('main-content');
+
+        // -------------------------------
+        // Sidebar AJAX loader
+        // -------------------------------
+        document.querySelectorAll('.load-page').forEach(link => {
+            link.addEventListener('click', async function (e) {
+                e.preventDefault();
+                const url = this.dataset.url;
+                if (!url) return;
+
+                try {
+                    const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    const data = await res.json();
+                 if (data.html) {
+  mainContent.innerHTML = data.html;
+
+  const scripts = mainContent.querySelectorAll('script');
+  scripts.forEach(script => {
+    const newScript = document.createElement('script');
+    if (script.src) newScript.src = script.src;
+    else newScript.textContent = script.textContent;
+    document.body.appendChild(newScript);
+    document.body.removeChild(newScript);
+  });
+}
+ //Reinitialize register form if it's loaded via AJAX
+if (typeof initializeRegisterForm === 'function') {
+ function initializeRegisterForm() {
+    
+ }
+}
+
+                } catch (err) {
+                    console.error("Failed to load page:", err);
+                    mainContent.innerHTML = "<p class='text-danger p-4'>Failed to load content.</p>";
+                }
+            });
+        });
+
+        // -------------------------------
+        // Load users by role
+        // -------------------------------
+        document.querySelectorAll('.load-users-role').forEach(link => {
+            link.addEventListener('click', async function(e) {
+                e.preventDefault();
+                const role = this.dataset.role;
+                try {
+                    const res = await fetch(`/admin/users/?role=${role}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    const data = await res.json();
+                    if (data.html) {
+                        mainContent.innerHTML = data.html;
+
+                        //  Re-run scripts from the loaded HTML
+                        const scripts = mainContent.querySelectorAll('script');
+                        scripts.forEach(script => {
+                            const newScript = document.createElement('script');
+                            if (script.src) newScript.src = script.src;
+                            else newScript.textContent = script.textContent;
+                            document.body.appendChild(newScript);
+                            document.body.removeChild(newScript);
+                        });
+                    }
+                } catch(err) {
+                    console.error(err);
+                    mainContent.innerHTML = "<p class='text-danger p-4'>Failed to load users.</p>";
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

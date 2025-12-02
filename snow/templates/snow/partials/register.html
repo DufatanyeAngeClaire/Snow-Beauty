@@ -1,0 +1,168 @@
+{% load static %}
+<div class="card p-4 shadow" style="max-width: 600px; width: 100%;">
+    <h3 class="text-center mb-4" id="form-title">Add User</h3>
+
+    <form id="user-form" method="post" action="{% url 'register' %}">
+        {% csrf_token %}
+        <input type="hidden" name="user_id" id="user_id" value="">
+        <input type="hidden" name="role" id="role" value="user">
+
+        <!-- Common fields -->
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input type="text" name="username" class="form-control" placeholder="Username" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Email</label>
+            <input type="email" name="email" class="form-control" placeholder="Email" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input type="password" name="password1" class="form-control" placeholder="Password">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Confirm Password</label>
+            <input type="password" name="password2" class="form-control" placeholder="Confirm Password">
+        </div>
+
+        <!-- Salon / Shop fields -->
+        <div class="role-fields" id="salon-fields" style="display:none;">
+            <div class="mb-3">
+                <label class="form-label">Business Name</label>
+                <input type="text" name="salon_name" class="form-control" placeholder="Business Name">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Business Address</label>
+                <input type="text" name="salon_address" class="form-control" placeholder="Business Address">
+            </div>
+        </div>
+
+        <!-- Provider fields -->
+        <div class="role-fields" id="provider-fields" style="display:none;">
+            <div class="mb-3">
+                <label class="form-label">Address</label>
+                <input type="text" name="provider_address" class="form-control" placeholder="Enter your address">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Services You Offer</label>
+                {% for key, label in Service.SERVICE_TYPES %}
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="service_types" value="{{ key }}" id="service-{{ key }}">
+                    <label class="form-check-label" for="service-{{ key }}">{{ label }}</label>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100" id="submit-btn">Add User</button>
+        <button type="button" class="btn btn-secondary w-100 mt-2" id="cancel-edit" style="display:none;">Cancel Edit</button>
+    </form>
+</div>
+
+<!-- Users Table -->
+<div id="users-section" class="mt-4">
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th class="text-center">Actions</th>
+            </tr>
+        </thead>
+        <tbody id="users-table-body">
+            {% include 'snow/partials/users_table_body.html' %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function initializeRegisterForm() {
+    const menuItems = document.querySelectorAll('#role-menu li');
+    const roleInput = document.getElementById('role');
+    const fields = document.querySelectorAll('.role-fields');
+    const formTitle = document.getElementById('form-title');
+    const submitBtn = document.getElementById('submit-btn');
+    const cancelBtn = document.getElementById('cancel-edit');
+    const userForm = document.getElementById('user-form');
+
+    function showFieldsForRole(role) {
+        fields.forEach(f => f.style.display = 'none');
+        if(role === 'salon' || role === 'shop') {
+            document.getElementById('salon-fields').style.display = 'block';
+        } else if(role === 'provider') {
+            document.getElementById('provider-fields').style.display = 'block';
+        }
+    }
+
+    // Default role
+    showFieldsForRole(roleInput.value || 'user');
+
+    // Function to load user data for editing
+    window.loadUserForEdit = function(user) {
+        document.getElementById('user_id').value = user.id;
+        formTitle.textContent = 'Edit User';
+        submitBtn.textContent = 'Update User';
+        cancelBtn.style.display = 'block';
+
+        userForm.username.value = user.username;
+        userForm.email.value = user.email;
+        roleInput.value = user.role;
+        showFieldsForRole(user.role);
+
+        if(user.role === 'salon' || user.role === 'shop') {
+            userForm.salon_name.value = user.salon_name || '';
+            userForm.salon_address.value = user.salon_address || '';
+        } else if(user.role === 'provider') {
+            userForm.provider_address.value = user.provider_address || '';
+            const checkboxes = document.querySelectorAll('input[name="service_types"]');
+            checkboxes.forEach(cb => cb.checked = user.services?.includes(cb.value) || false);
+        }
+    }
+
+    // Cancel editing
+    cancelBtn.addEventListener('click', function() {
+        userForm.reset();
+        document.getElementById('user_id').value = '';
+        formTitle.textContent = 'Add User';
+        submitBtn.textContent = 'Add User';
+        cancelBtn.style.display = 'none';
+        showFieldsForRole('user');
+    });
+
+    // AJAX form submission
+    userForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const formData = new FormData(userForm);
+
+        try {
+            const res = await fetch(userForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await res.json();
+
+            if(data.success) {
+                // Update users table
+                document.getElementById('users-table-body').innerHTML = data.users_table_html;
+                userForm.reset();
+                document.getElementById('user_id').value = '';
+                formTitle.textContent = 'Add User';
+                submitBtn.textContent = 'Add User';
+                cancelBtn.style.display = 'none';
+                showFieldsForRole('user');
+            } else {
+                alert('Error: ' + (data.errors || 'Unknown error'));
+            }
+        } catch(err) {
+            console.error(err);
+            alert('Failed to submit form.');
+        }
+    });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initializeRegisterForm);
+</script>

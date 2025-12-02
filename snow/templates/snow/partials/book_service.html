@@ -1,0 +1,17 @@
+{% extends 'snow/base.html' %}
+{% load static %}
+
+{% block title %}Book {{ service.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h3>Book {{ service.name }} at {{ service.salon.name }}</h3>
+  <p>Price: <strong>{{ service.price }}</strong></p>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Confirm Booking</button>
+  </form>
+</div>
+{% endblock %}

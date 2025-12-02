@@ -1,0 +1,62 @@
+<form method="post" id="add-service-form" enctype="multipart/form-data"
+      action="{% if form.instance.pk %}{% url 'owner_edit_service' form.instance.pk %}{% else %}{% url 'owner_add_service' %}{% endif %}">
+    
+    {% csrf_token %} 
+
+    <div id="service-form-errors" class="text-danger mb-3"></div>
+
+    <p>
+        <label for="id_name">Name:</label>
+        {{ form.name }}
+    </p>
+
+    <p>
+        <label for="id_price">Price:</label>
+        {{ form.price }}
+    </p>
+
+    <p>
+        <label for="id_duration_minutes">Duration (minutes):</label>
+        {{ form.duration_minutes }}
+    </p>
+
+    <p>
+        <label for="id_service_type">Service Type:</label>
+        {{ form.service_type }}
+    </p>
+
+    <p>
+        <label for="id_featured">Featured:</label>
+        {{ form.featured }}
+    </p>
+
+    <p>
+        <label for="id_image">Main Image:</label>
+        {{ form.image }}
+    </p>
+
+    <p>
+        <label for="id_gallery_image1">Gallery Image 1:</label>
+        {{ form.gallery_image1 }}
+    </p>
+
+    <p>
+        <label for="id_gallery_image2">Gallery Image 2:</label>
+        {{ form.gallery_image2 }}
+    </p>
+
+    <p>
+        <label for="id_gallery_image3">Gallery Image 3:</label>
+        {{ form.gallery_image3 }}
+    </p>
+
+    <p>
+        <label for="id_video">Video:</label>
+        {{ form.video }}
+    </p>
+
+    <button type="submit" id="service-submit-btn" class="btn btn-primary">
+        {% if form.instance.pk %}Update Service{% else %}Add Service{% endif %}
+    </button>
+    <button type="button" id="service-cancel-btn" class="btn btn-secondary d-none">Cancel</button>
+</form>

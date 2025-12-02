@@ -1,0 +1,108 @@
+<form id="user-form" method="post" action="{% url 'register' %}">
+    {% csrf_token %}
+    <input type="hidden" name="user_id" id="user_id">
+
+    <input type="text" name="username" placeholder="Username" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="password" name="password1" placeholder="Password" required>
+    <input type="password" name="password2" placeholder="Confirm Password" required>
+
+    <div id="business-fields" style="display:none;">
+        <input type="text" name="salon_name" placeholder="Business Name">
+        <input type="text" name="salon_address" placeholder="Business Address">
+    </div>
+
+    <div id="provider-fields" style="display:none;">
+        <input type="text" name="provider_address" placeholder="Provider Address">
+        <label>Services Offered</label>
+        <div><input type="checkbox" name="service_types" value="haircut"> Haircut</div>
+        <div><input type="checkbox" name="service_types" value="hairdress"> Hairdress</div>
+        <div><input type="checkbox" name="service_types" value="styling"> Styling</div>
+    </div>
+
+    <button type="submit" id="submit-btn">Add User</button>
+    <button type="button" id="cancel-edit" style="display:none;">Cancel Edit</button>
+</form>
+
+<div id="users-section">
+    <table>
+        <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead>
+        <tbody id="users-table-body">{% include 'snow/partials/users_table_body.html' %}</tbody>
+    </table>
+</div>
+
+<script>
+const form = document.getElementById('user-form');
+const roleSelect = form.querySelector('#role');
+const businessFields = form.querySelector('#business-fields');
+const providerFields = form.querySelector('#provider-fields');
+const cancelBtn = form.querySelector('#cancel-edit');
+const submitBtn = form.querySelector('#submit-btn');
+
+function toggleFields(role) {
+    businessFields.style.display = ['salon','shop'].includes(role) ? 'block' : 'none';
+    providerFields.style.display = role === 'provider' ? 'block' : 'none';
+}
+toggleFields(roleSelect.value);
+roleSelect.addEventListener('change', ()=>toggleFields(roleSelect.value));
+
+form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const userId = form.querySelector('#user_id').value;
+    const url = userId ? `/admin/users/edit/${userId}/` : form.action;
+    const res = await fetch(url, {method:'POST', body:new FormData(form), headers:{'X-Requested-With':'XMLHttpRequest'}});
+    const data = await res.json();
+    if (data.success) {
+        document.getElementById('users-table-body').innerHTML = data.html;
+        form.reset();
+        form.querySelector('#user_id').value='';
+        submitBtn.textContent='Add User';
+        cancelBtn.style.display='none';
+        toggleFields(roleSelect.value);
+        attachUserActions();
+    } else if(data.errors){
+        alert(Object.values(data.errors).join('\n'));
+    }
+});
+
+cancelBtn.onclick = ()=>{ form.reset(); form.querySelector('#user_id').value=''; submitBtn.textContent='Add User'; cancelBtn.style.display='none'; toggleFields(roleSelect.value); }
+
+function attachUserActions(){
+    document.querySelectorAll('.edit-user-btn').forEach(btn=>{
+        btn.onclick = async ()=>{
+            const userId = btn.dataset.id;
+            const res = await fetch(`/admin/users/edit/${userId}/`, {headers:{'X-Requested-With':'XMLHttpRequest'}});
+            const data = await res.json();
+            form.querySelector('#user_id').value = userId;
+            form.querySelector('input[name="username"]').value = data.username;
+            form.querySelector('input[name="email"]').value = data.email;
+            roleSelect.value = data.role; toggleFields(data.role);
+            if(['salon','shop'].includes(data.role)){
+                form.querySelector('input[name="salon_name"]').value=data.salon_name||'';
+                form.querySelector('input[name="salon_address"]').value=data.salon_address||'';
+            }
+            if(data.role==='provider'){
+                form.querySelector('input[name="provider_address"]').value=data.provider_address||'';
+                form.querySelectorAll('input[name="service_types"]').forEach(cb=>cb.checked=false);
+                data.service_types?.forEach(s=>{
+                    const cb=form.querySelector(`input[name="service_types"][value="${s}"]`);
+                    if(cb) cb.checked=true;
+                });
+            }
+            submitBtn.textContent='Update User';
+            cancelBtn.style.display='inline-block';
+        }
+    });
+
+    document.querySelectorAll('.delete-user-btn').forEach(btn=>{
+        btn.onclick=async()=>{
+            if(!confirm('Are you sure?')) return;
+            const userId=btn.dataset.id;
+            const res = await fetch(`/admin/users/delete/${userId}/`, {method:'POST', headers:{'X-Requested-With':'XMLHttpRequest','X-CSRFToken':form.querySelector('[name=csrfmiddlewaretoken]').value}});
+            const data = await res.json();
+            if(data.success) document.getElementById('users-table-body').innerHTML = data.html;
+            attachUserActions();
+        }
+    });
+}
+attachUserActions();

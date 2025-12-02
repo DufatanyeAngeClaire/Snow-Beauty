@@ -1,0 +1,8 @@
+<h3>Book: {{ service.name }}</h3>
+<p>Salon: {{ service.salon.name }}</p>
+<p>Price: ${{ service.price }}</p>
+
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Confirm Booking</button>
+</form>

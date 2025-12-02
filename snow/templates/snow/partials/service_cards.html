@@ -1,0 +1,29 @@
+<div class="row g-3">
+  {% for service in services %}
+  <div class="col-md-4">
+    <div class="card shadow-sm border-0 h-100">
+      {% if service.image %}
+        <img src="{{ service.image.url }}" class="card-img-top" alt="{{ service.name }}" style="height:200px; object-fit:cover;">
+      {% else %}
+        <div class="bg-light d-flex align-items-center justify-content-center" style="height:200px; color:#aaa;">
+          No image
+        </div>
+      {% endif %}
+
+      <div class="card-body text-center">
+        <h5 class="text-purple">{{ service.name }}</h5>
+        <p><strong>Price:</strong> UGX {{ service.price }}</p>
+        <p><strong>Duration:</strong> {{ service.duration_minutes }} mins</p>
+        {% if service.promotion %}
+          <p class="text-success"><strong>Promo:</strong> {{ service.promotion }}</p>
+        {% endif %}
+        <a href="{% url 'book_service' service.id %}" class="btn btn-outline-primary btn-sm mt-2">
+          <i class="fa fa-calendar"></i> Book Now
+        </a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <p class="text-center text-muted">No services found for this category.</p>
+  {% endfor %}
+</div>

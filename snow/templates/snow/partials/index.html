@@ -1,0 +1,182 @@
+{% extends 'snow/base.html' %}
+{% load static %}
+
+{% block title %}Snow Beauty Unisex Salon{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="hero-section py-5">
+  <div class="container text-center">
+    <h1 class="display-5 fw-bold text-purple mb-3 animate-fade">Welcome to Snow Beauty Unisex Salon</h1>
+    <p class="lead text-muted mb-5 animate-fade-delay">
+      Experience beauty, relaxation, and style all in one place.
+      Our professional stylists and beauty experts are ready to make you look and feel your best.
+    </p>
+
+    <!-- SEARCH FORM -->
+  <form method="GET" action="{% url 'search_items' %}" 
+      class="search-form mx-auto p-4 rounded-4 shadow-lg bg-white animate-up">
+  <div class="row g-3 align-items-center justify-content-center">
+
+    <!-- Search Keyword -->
+    <div class="col-md-3 col-sm-6">
+      <input type="text" class="form-control rounded-pill text-secondary" 
+             name="query" placeholder="What are you looking for?">
+    </div>
+
+    <!-- Service Selection -->
+    <div class="col-md-3 col-sm-6">
+      <select class="form-select rounded-pill text-secondary" name="service">
+        <option value="">Select Service</option>
+        <option value="haircut">Haircut</option>
+        <option value="styling">Styling</option>
+        <option value="coloring">Coloring</option>
+        <option value="massage">Massage</option>
+        <option value="facial">Facial</option>
+        <option value="nail">Nail</option>
+        <option value="makeup">MakeUp</option>
+        <option value="hairdress">Hairdress</option>
+      </select>
+    </div>
+
+    <!-- Location -->
+    <div class="col-md-3 col-sm-6">
+      <input type="text" class="form-control rounded-pill text-secondary" 
+             name="address" placeholder="Enter Location">
+    </div>
+
+    <!-- Price Range -->
+    <div class="col-md-3 col-sm-6">
+      <select class="form-select rounded-pill text-secondary" name="price_range">
+        <option value="">Price Range</option>
+        <option value="low">Below UGX 30,000</option>
+        <option value="medium">UGX 30,000 - 80,000</option>
+        <option value="high">Above UGX 80,000</option>
+      </select>
+    </div>
+
+    <!-- Search Button -->
+    <div class="col-md-2 col-sm-6 d-grid">
+      <button type="submit" class="btn btn-primary rounded-pill fw-semibold">
+        <i class="bi bi-search"></i> Search
+      </button>
+    </div>
+
+  </div>
+</form>
+
+    <!-- join us-->
+  <div class="join-us-section mt-5 animate-fade-delay">
+  <div class="content">
+    <p>
+      Are you a salon owner looking to sell your services and products with ease?
+    </p>
+    <a href="#" class="btn btn-primary btn-lg">Join Us</a>
+  </div>
+</div>
+
+    <!-- Collapsible Info -->
+    <div class="collapse mt-4" id="servicesInfo">
+      <div class="card card-body border-0 shadow-sm mx-auto" style="max-width: 700px;">
+        From haircuts and color treatments to facials and massages,
+        Snow Beauty offers complete beauty care for both men and women.
+        Book your next session easily through our mobile app.
+      </div>
+    </div>
+  </div>
+</section>
+<section class="container my-5">
+  <div class="row">
+    <!-- SIDEBAR -->
+    {% include 'snow/partials/sidebar.html' %}
+
+    <!-- MAIN CONTENT -->
+    <div class="col-md-9">
+
+      <!-- Navigation Cards for Quick Access -->
+      <div class="row g-4 mb-5 justify-content-start text-center">
+        <div class="col-md-4">
+          <div class="card shadow-sm hover-scale cursor-pointer" onclick="document.getElementById('servicesCarousel').scrollIntoView({ behavior: 'smooth' });">
+         <div class="card shadow-sm hover-scale cursor-pointer" onclick="document.getElementById('all-services').scrollIntoView({ behavior: 'smooth' });">
+  <div class="card-body">
+    <i class="bi bi-scissors fs-1 text-purple mb-3"></i>
+    <h5 class="card-title fw-bold">Services</h5>
+    <p class="card-text text-muted">View and book our salon services.</p>
+  </div>
+</div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card shadow-sm hover-scale cursor-pointer" onclick="document.getElementById('products').scrollIntoView({ behavior: 'smooth' });">
+            <div class="card-body">
+              <i class="bi bi-box-seam fs-1 text-purple mb-3"></i>
+              <h5 class="card-title fw-bold">Products</h5>
+              <p class="card-text text-muted">Browse our hair care and beauty products.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card shadow-sm hover-scale cursor-pointer" onclick="document.getElementById('appointments').scrollIntoView({ behavior: 'smooth' });">
+            <div class="card-body">
+              <i class="bi bi-calendar-check fs-1 text-purple mb-3"></i>
+              <h5 class="card-title fw-bold">Appointments</h5>
+              <p class="card-text text-muted">Schedule your next appointment with us.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Services Carousel -->
+      <div id="servicesCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
+        <!-- Your carousel content -->
+      </div>
+
+      <!-- Products Section -->
+<!-- Services Section -->
+<div id="main-services-content">
+  <div id="servicesCarousel" class="carousel slide mb-5" data-bs-ride="carousel">
+    <div class="row g-3">
+    {% for product in products %}
+ <div class="col-md-4">
+  <a href="{% url 'product_detail' product.id %}" class="text-decoration-none text-dark">
+    <div class="card shadow-sm h-100 hover-scale">
+      {% if product.image %}
+      <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ product.name }}</h5>
+        <p class="card-text">UGX {{ product.price }}</p>
+      </div>
+    </div>
+  </a>
+</div>
+
+    {% empty %}
+    <p class="text-muted">No featured products available.</p>
+    {% endfor %}
+</div>
+  </div>
+</div>
+    </div>
+  </div>
+</section>
+
+<script>
+document.querySelectorAll('.list-group-item').forEach(item => {
+  item.addEventListener('click', function() {
+    const serviceType = this.dataset.service;
+    fetch(`{% url 'filter_services_by_type' %}?service=${serviceType}`)
+      .then(response => response.json())
+      .then(data => {
+        document.querySelector('#main-services-content').innerHTML = data.html;
+        // Optional: scroll to content
+        document.querySelector('#main-services-content').scrollIntoView({ behavior: 'smooth' });
+      });
+  });
+});
+</script>
+
+{% endblock %}

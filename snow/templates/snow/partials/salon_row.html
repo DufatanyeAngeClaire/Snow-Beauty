@@ -1,0 +1,24 @@
+<tr data-id="{{ salon.id }}">
+    <td>{{ forloop.counter }}</td>
+    <td class="salon-name">{{ salon.name }}</td>
+    <td class="salon-address">{{ salon.address }}</td>
+    <td class="salon-rating">{{ salon.rating }}</td>
+    <td class="salon-owner">{% if salon.owner %}{{ salon.owner.username }}{% else %}-{% endif %}</td>
+    <td class="salon-status">
+        {% if salon.approved %}
+            <span class="badge bg-success">Approved</span>
+        {% else %}
+            <span class="badge bg-warning">Pending</span>
+        {% endif %}
+    </td>
+    <td>
+        {% if not salon.approved %}
+            <button class="btn btn-sm btn-success approve-btn" data-id="{{ salon.id }}">Approve</button>
+            <button class="btn btn-sm btn-danger reject-btn" data-id="{{ salon.id }}">Reject</button>
+        {% else %}
+            <button class="btn btn-sm btn-secondary" disabled>Approved</button>
+        {% endif %}
+        <button class="btn btn-sm btn-warning edit-salon-btn" data-id="{{ salon.id }}">Edit</button>
+        <button class="btn btn-sm btn-outline-danger delete-salon-btn" data-id="{{ salon.id }}">Delete</button>
+    </td>
+</tr>

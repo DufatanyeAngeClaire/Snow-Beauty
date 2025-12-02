@@ -1,0 +1,107 @@
+
+<style>
+/* 🌸 Edit Profile Form Styles */
+.edit-profile-form {
+    max-width: 700px;
+    margin: 40px auto;
+    background: #fff;
+    padding: 30px 25px;
+    border-radius: 14px;
+    box-shadow: 0 6px 15px rgba(233, 30, 99, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+.edit-profile-form h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #e91e63;
+}
+
+.edit-profile-form label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.edit-profile-form input,
+.edit-profile-form select,
+.edit-profile-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.edit-profile-form input:focus,
+.edit-profile-form select:focus,
+.edit-profile-form textarea:focus {
+    border-color: #e91e63;
+    outline: none;
+}
+
+.edit-profile-form button {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: #e91e63;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.edit-profile-form button:hover {
+    background: #d81b60;
+}
+
+.form-errors {
+    background: #ffe6ea;
+    border: 1px solid #f5c2c7;
+    color: #b71c1c;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+</style>
+
+<div class="edit-profile-form">
+    <h2>Edit Profile</h2>
+
+    <form method="POST" action="{% url 'edit_profile' %}">
+        {% csrf_token %}
+
+        <!-- Display form errors -->
+        {% if form.errors %}
+        <div class="form-errors">
+            <ul>
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Render all fields explicitly -->
+        {% for field in form %}
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.help_text %}
+                <small style="color: #777;">{{ field.help_text }}</small>
+            {% endif %}
+        {% endfor %}
+
+        <button type="submit">Update Profile</button>
+    </form>
+</div>

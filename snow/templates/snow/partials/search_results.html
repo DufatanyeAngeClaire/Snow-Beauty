@@ -1,0 +1,168 @@
+{% extends 'snow/base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  /* --- Overall Page Styling --- */
+  body {
+    background-color: #f8f9fa;
+  }
+
+  /* --- Card Animation and Style --- */
+  .result-card {
+    transition: all 0.3s ease-in-out;
+    border-radius: 20px;
+    overflow: hidden;
+    background-color: #fff;
+  }
+
+  .result-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+  }
+
+  .card-img-top {
+    height: 230px;
+    object-fit: cover;
+  }
+
+  /* --- Section Titles --- */
+  .section-title {
+    font-weight: 700;
+    color: #3b3b98;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+  }
+
+  .section-title::after {
+    content: "";
+    width: 70px;
+    height: 3px;
+    background-color: #3b3b98;
+    display: block;
+    margin: 10px auto 0;
+    border-radius: 5px;
+  }
+
+  /* --- Buttons --- */
+  .btn-custom {
+    background-color: #3b3b98;
+    color: white;
+    border: none;
+    transition: 0.3s;
+  }
+
+  .btn-custom:hover {
+    background-color: #575fcf;
+    transform: scale(1.05);
+  }
+
+  /* --- Promo Badge --- */
+  .badge-promo {
+    background-color: #0be881;
+    color: #1e272e;
+    font-weight: 600;
+    border-radius: 12px;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
+  /* --- Spacing --- */
+  .section-divider {
+    height: 3px;
+    background-color: #e1e1e1;
+    border: none;
+    border-radius: 3px;
+    margin: 60px 0;
+  }
+</style>
+
+<div class="container my-5">
+  <!-- Featured Services -->
+  <h3 class="section-title text-center mb-4">
+    <i class="bi bi-scissors"></i> Featured Services
+  </h3>
+
+  {% if services %}
+    <div class="row g-4">
+      {% for service in services %}
+        <div class="col-md-4 col-sm-6">
+          <div class="card result-card shadow-sm h-100">
+            {% if service.image %}
+              <img src="{{ service.image.url }}" class="card-img-top" alt="{{ service.name }}">
+            {% else %}
+              <img src="{% static 'images/no-image.jpg' %}" class="card-img-top" alt="No Image">
+            {% endif %}
+
+            <div class="card-body text-center">
+              <h5 class="fw-bold mb-1">{{ service.name }}</h5>
+              <p class="text-muted small mb-1">{{ service.get_service_type_display }}</p>
+              <p class="text-primary fw-semibold mb-1">UGX {{ service.price|floatformat:0 }}</p>
+              <p class="small text-muted mb-2">
+                <i class="bi bi-geo-alt"></i> {{ service.salon.address }}
+              </p>
+
+              {% if service.promotion %}
+                <span class="badge badge-promo">Promo: {{ service.promotion }}</span>
+              {% endif %}
+
+              <div class="mt-3">
+                <a href="#" class="btn btn-sm btn-custom rounded-pill px-4">
+                  <i class="bi bi-calendar2-check"></i> Book Now
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center text-muted mt-3">No featured services found matching your search.</p>
+  {% endif %}
+
+  <hr class="section-divider">
+
+  <!-- Featured Products -->
+  <h3 class="section-title text-center mb-4">
+    <i class="bi bi-bag-heart"></i> Featured Products
+  </h3>
+
+  {% if products %}
+    <div class="row g-4">
+      {% for product in products %}
+        <div class="col-md-4 col-sm-6">
+          <div class="card result-card shadow-sm h-100">
+            {% if product.image %}
+              <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+            {% else %}
+              <img src="{% static 'images/no-image.jpg' %}" class="card-img-top" alt="No Image">
+            {% endif %}
+
+            <div class="card-body text-center">
+              <h5 class="fw-bold mb-1">{{ product.name }}</h5>
+              <p class="text-primary fw-semibold mb-1">UGX {{ product.price|floatformat:0 }}</p>
+              <p class="small text-muted mb-2">
+                <i class="bi bi-shop"></i> {{ product.salon.name }}<br>
+                <i class="bi bi-geo-alt"></i> {{ product.salon.address }}
+              </p>
+
+              {% if product.description %}
+                <p class="small text-secondary">{{ product.description|truncatewords:12 }}</p>
+              {% endif %}
+
+              <div class="mt-3">
+                <a href="#" class="btn btn-sm btn-custom rounded-pill px-4">
+                  <i class="bi bi-eye"></i> View Details
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center text-muted mt-3">No featured products found matching your search.</p>
+  {% endif %}
+</div>
+{% endblock %}

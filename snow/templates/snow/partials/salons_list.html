@@ -1,0 +1,205 @@
+<div id="salons-section" class="p-4">
+  <h3>Salons List</h3>
+
+  <!-- Add/Edit Salon Form -->
+  {% if form %}
+  <div id="salon-form-errors" class="text-danger mb-3"></div>
+  <form id="add-salon-form" method="post" action="{% url 'salons_list' %}" class="mb-4">
+      {% csrf_token %}
+      <div class="mb-3">
+          {{ form.name.label_tag }}
+          {{ form.name }}
+      </div>
+      <div class="mb-3">
+          {{ form.address.label_tag }}
+          {{ form.address }}
+      </div>
+      <div class="mb-3">
+          {{ form.rating.label_tag }}
+          {{ form.rating }}
+      </div>
+      <div class="mb-3">
+          <label>Owner Username</label>
+          {{ form.owner_username }}
+      </div>
+      <div class="mb-3">
+          <label>Owner Email</label>
+          {{ form.owner_email }}
+      </div>
+      <div class="mb-3">
+          <label>Owner Password</label>
+          {{ form.owner_password }}
+      </div>
+
+      <button type="submit" id="salon-submit-btn" class="btn btn-primary">Add Salon</button>
+      <button type="button" id="salon-cancel-btn" class="btn btn-secondary d-none">Cancel</button>
+  </form>
+  {% endif %}
+
+  <!-- Salons Table -->
+  <table class="table table-striped">
+      <thead>
+          <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Address</th>
+              <th>Rating</th>
+              <th>Owner</th>
+              <th>Status</th>
+              <th>Actions</th>
+          </tr>
+      </thead>
+      <tbody>
+    {% for salon in salons %}
+    <tr data-id="{{ salon.id }}">
+        <td>{{ forloop.counter }}</td>
+        <td class="salon-name">{{ salon.name }}</td>
+        <td class="salon-address">{{ salon.address }}</td>
+        <td class="salon-rating">{{ salon.rating }}</td>
+        <td class="salon-owner">{% if salon.owner %}{{ salon.owner.username }}{% else %}-{% endif %}</td>
+        <td class="salon-status">{% if salon.approved %}<span class="badge bg-success">Approved</span>{% else %}<span class="badge bg-warning">Pending</span>{% endif %}</td>
+        <td>
+            {% if not salon.approved %}
+                <button class="btn btn-sm btn-success approve-btn" data-id="{{ salon.id }}">Approve</button>
+                <button class="btn btn-sm btn-danger reject-btn" data-id="{{ salon.id }}">Reject</button>
+            {% else %}
+                <button class="btn btn-sm btn-secondary" disabled>Approved</button>
+            {% endif %}
+            <button class="btn btn-sm btn-warning edit-salon-btn" data-id="{{ salon.id }}">Edit</button>
+            <button class="btn btn-sm btn-outline-danger delete-salon-btn" data-id="{{ salon.id }}">Delete</button>
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="7" class="text-center">No salons available</td></tr>
+    {% endfor %}
+</tbody>
+
+  </table>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const salonForm = document.getElementById('add-salon-form');
+    const submitBtn = document.getElementById('salon-submit-btn');
+    const cancelBtn = document.getElementById('salon-cancel-btn');
+    const errorDiv = document.getElementById('salon-form-errors');
+    const salonTableBody = document.querySelector("#salons-section table tbody");
+
+    const getCSRFToken = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    const resetForm = () => {
+        salonForm.reset();
+        delete salonForm.dataset.id;
+        submitBtn.innerText = "Add Salon";
+        cancelBtn.classList.add('d-none');
+        errorDiv.innerHTML = '';
+    };
+
+    salonForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        errorDiv.innerHTML = '';
+        const formData = new FormData(salonForm);
+        const id = salonForm.dataset.id || '';
+        if (id) formData.append('id', id);
+
+        const url = salonForm.getAttribute('action');
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {'X-Requested-With': 'XMLHttpRequest','X-CSRFToken': getCSRFToken()},
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                if (id) {
+                    const row = document.querySelector(`tr[data-id='${id}']`);
+                    row.outerHTML = data.row_html;
+                } else {
+                    salonTableBody.insertAdjacentHTML('afterbegin', data.row_html);
+                }
+                resetForm();
+                bindActions();
+            } else if (data.error) {
+                for (const [field, messages] of Object.entries(data.error)) {
+                    errorDiv.innerHTML += `<strong>${field}:</strong> ${messages.join(', ')}<br>`;
+                }
+            }
+        } catch(err) {
+            console.error(err);
+            errorDiv.innerText = 'Unexpected error occurred.';
+        }
+    });
+
+    const bindActions = () => {
+        // Edit
+        document.querySelectorAll(".edit-salon-btn").forEach(btn => {
+            btn.onclick = async () => {
+                const id = btn.dataset.id;
+                const res = await fetch(`/admin/salon/edit/${id}/`, {
+                    headers: {"X-Requested-With": "XMLHttpRequest"}
+                });
+                const data = await res.json();
+                salonForm.dataset.id = id;
+                document.querySelector('#id_name').value = data.name;
+                document.querySelector('#id_address').value = data.address;
+                document.querySelector('#id_rating').value = data.rating;
+                document.querySelector('#id_owner_username').value = data.owner_username || '';
+                document.querySelector('#id_owner_email').value = data.owner_email || '';
+                submitBtn.innerText = "Save Changes";
+                cancelBtn.classList.remove('d-none');
+            };
+        });
+
+        // Delete
+        document.querySelectorAll(".delete-salon-btn").forEach(btn => {
+            btn.onclick = async () => {
+                if (!confirm("Delete this salon permanently?")) return;
+                const id = btn.dataset.id;
+                const res = await fetch(`/admin/salon/delete/${id}/`, {
+                    method: "POST",
+                    headers: {"X-CSRFToken": getCSRFToken()}
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const row = document.querySelector(`tr[data-id='${id}']`);
+                    if (row) row.remove();
+                }
+            };
+        });
+
+        // Approve/Reject
+        document.querySelectorAll(".approve-btn").forEach(btn => {
+            btn.onclick = async () => {
+                if (!confirm("Approve this salon?")) return;
+                const id = btn.dataset.id;
+                const res = await fetch(`/admin/salon/approve/${id}/`, {
+                    method: "POST",
+                    headers: {"X-CSRFToken": getCSRFToken()}
+                });
+                const data = await res.json();
+                if (data.success) location.reload();
+            };
+        });
+
+        document.querySelectorAll(".reject-btn").forEach(btn => {
+            btn.onclick = async () => {
+                if (!confirm("Reject this salon?")) return;
+                const id = btn.dataset.id;
+                const res = await fetch(`/admin/salon/reject/${id}/`, {
+                    method: "POST",
+                    headers: {"X-CSRFToken": getCSRFToken()}
+                });
+                const data = await res.json();
+                if (data.success) location.reload();
+            };
+        });
+    };
+
+    bindActions();
+});
+</script>
+
+
+
+

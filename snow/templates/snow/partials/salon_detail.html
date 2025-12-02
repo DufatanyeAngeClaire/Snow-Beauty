@@ -1,0 +1,51 @@
+{% extends 'snow/base.html' %}
+{% load static %}
+
+{% block title %}{{ salon.name }} - Details{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="text-center">{{ salon.name }}</h1>
+    <p class="text-center text-muted">{{ salon.address }}</p>
+
+    <hr>
+
+    <h3 class="mt-4">Available Services</h3>
+    <div class="row">
+        {% for service in salon.services.all %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                {% if service.image %}
+                <img src="{{ service.image.url }}" class="card-img-top" style="height:200px;object-fit:cover;">
+                {% endif %}
+                <div class="card-body">
+                    <h5>{{ service.name }}</h5>
+                    <p>UGX {{ service.price }}</p>
+                    <a href="{% url 'book_service' service.id %}" class="btn btn-sm btn-primary">Book Now</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No services available.</p>
+        {% endfor %}
+    </div>
+
+    <h3 class="mt-5">Available Products</h3>
+    <div class="row">
+        {% for product in salon.products.all %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <img src="{{ product.image.url }}" class="card-img-top" style="height:200px;object-fit:cover;">
+                <div class="card-body">
+                    <h5>{{ product.name }}</h5>
+                    <p>UGX {{ product.price }}</p>
+                    <a href="{% url 'product_detail' product.id %}" class="btn btn-sm btn-outline-primary">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No products available.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

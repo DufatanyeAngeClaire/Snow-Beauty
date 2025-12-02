@@ -1,0 +1,119 @@
+<div id="products-section">
+    <!-- Product Form -->
+    <form method="post" id="add-product-form" enctype="multipart/form-data" data-edit-id="">
+        {% csrf_token %}
+        <div id="product-form-errors" class="text-danger mb-3"></div>
+        {{ form.as_p }}
+        <button type="submit" id="product-submit-btn" class="btn btn-primary">Add Product</button>
+        <img id="product-preview-image" style="max-width:100px; display:block; margin-top:10px;" src="" alt="">
+    </form>
+
+    <hr>
+
+    <table class="table table-bordered mt-4">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Description</th>
+                <th>Featured</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{% if product.image %}<img src="{{ product.image.url }}" width="60">{% else %}—{% endif %}</td>
+                <td>{{ product.name }}</td>
+                <td>{{ product.price }}</td>
+                <td>{{ product.description }}</td>
+                <td>{{ product.featured|yesno:"Yes,No" }}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning edit-product-btn" data-id="{{ product.id }}">Edit</button>
+                    <button class="btn btn-sm btn-danger delete-product-btn" data-id="{{ product.id }}">Delete</button>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7" class="text-center">No products</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    document.addEventListener("click", async function(e) {
+    const csrfToken = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    // OPEN MODAL: ADD PRODUCT
+    if (e.target.matches("#add-product-btn")) {
+        const res = await fetch("{% url 'owner_add_or_edit_product'  %}", {
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        });
+        const data = await res.json();
+        showModal(data.html);
+    }
+
+    // OPEN MODAL: EDIT PRODUCT
+    if (e.target.matches(".edit-product-btn")) {
+        const id = e.target.dataset.id;
+        const res = await fetch("{% url 'owner_edit_product' 0 %}".replace("0", id), {
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        });
+        const data = await res.json();
+        showModal(data.html);
+    }
+
+    // DELETE PRODUCT
+    if (e.target.matches(".delete-product-btn")) {
+        const id = e.target.dataset.id;
+        if (!confirm("Are you sure you want to delete this product?")) return;
+
+        const res = await fetch("{% url 'owner_delete_product' 0 %}".replace("0", id), {
+            method: "POST",
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "X-CSRFToken": csrfToken()
+            }
+        });
+        const data = await res.json();
+        if (data.success) document.querySelector("#products-section").innerHTML = data.html;
+    }
+});
+
+// SUBMIT FORM (Add/Edit)
+document.addEventListener("submit", async function(e) {
+    const form = e.target;
+    if (!form.matches("#add-product-form") && !form.matches("#edit-product-form")) return;
+
+    e.preventDefault();
+    const formData = new FormData(form);
+    const id = form.dataset.id; // If editing, dataset.id is set
+
+    const url = id 
+        ? "{% url 'owner_edit_product' 0 %}".replace("0", id)
+        : "{% url 'owner_add_or_edit_product'%}";
+
+    try {
+        const res = await fetch(url, {
+            method: "POST",
+            body: formData,
+            headers: { "X-Requested-With": "XMLHttpRequest" }
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            document.querySelector("#products-section").innerHTML = data.html;
+            closeModal();
+        } else if (data.html) {
+            showModal(data.html);  // form with errors
+        }
+    } catch (err) {
+        console.error("Product form submit error:", err);
+    }
+});
+
+</script>

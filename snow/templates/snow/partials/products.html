@@ -1,0 +1,140 @@
+<div id="products-section-wrapper">
+    <!-- Product Form -->
+    <form method="post" id="add-product-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div id="product-form-errors" class="text-danger mb-3"></div>
+        {{ form.as_p }}
+        <button type="submit" id="product-submit-btn" class="btn btn-primary">Add Product</button>
+        <button type="button" id="product-cancel-btn" class="btn btn-secondary d-none">Cancel</button>
+        <img id="product-preview-image" style="max-width:100px; display:block; margin-top:10px;" src="" alt="">
+    </form>
+
+    <hr>
+
+    <!-- Products Table -->
+    <div id="products-section">
+        {% include "partials/product_table.html" %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('add-product-form');
+    const submitBtn = document.getElementById('product-submit-btn');
+    const cancelBtn = document.getElementById('product-cancel-btn');
+    const errorDiv = document.getElementById('product-form-errors');
+    const previewImage = document.getElementById('product-preview-image');
+    const imageInput = document.querySelector('#id_image');
+
+    function resetForm() {
+        form.reset();
+        delete form.dataset.id;
+        submitBtn.textContent = "Add Product";
+        cancelBtn.classList.add('d-none');
+        previewImage.src = '';
+        errorDiv.innerHTML = '';
+    }
+
+    async function loadProductForEdit(id) {
+        try {
+            const res = await fetch(`/admin/products/add_or_edit/?id=${id}`, {
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            });
+            const data = await res.json();
+            if (!data) return;
+
+            document.querySelector('#id_name').value = data.name;
+            document.querySelector('#id_price').value = data.price;
+            document.querySelector('#id_description').value = data.description;
+            document.querySelector('#id_featured').checked = data.featured;
+            previewImage.src = data.image || '';
+
+            form.dataset.id = id;
+            submitBtn.textContent = "Save Changes";
+            cancelBtn.classList.remove('d-none');
+        } catch (err) {
+            console.error('Error loading product:', err);
+        }
+    }
+
+    function bindButtons() {
+        // Edit buttons
+        document.querySelectorAll('.edit-product-btn').forEach(btn => {
+            btn.onclick = () => loadProductForEdit(btn.dataset.id);
+        });
+
+        // Delete buttons
+        document.querySelectorAll('.delete-product-btn').forEach(btn => {
+            btn.onclick = async () => {
+                if (!confirm("Are you sure you want to delete this product?")) return;
+                const id = btn.dataset.id;
+                try {
+                    const res = await fetch(`/admin/products/delete/${id}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        }
+                    });
+                    const data = await res.json();
+                    if (data.html) {
+                        document.getElementById('products-section').outerHTML = data.html;
+                        bindButtons();
+                        resetForm();
+                    }
+                } catch (err) {
+                    console.error('Error deleting product:', err);
+                }
+            };
+        });
+    }
+
+    // Image preview
+    if (imageInput) {
+        imageInput.addEventListener('change', function () {
+            if (this.files && this.files[0]) {
+                previewImage.src = URL.createObjectURL(this.files[0]);
+            }
+        });
+    }
+
+    // Form submit (Add/Edit)
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        errorDiv.innerHTML = '';
+
+        const formData = new FormData(form);
+        const id = form.dataset.id;
+        const url = id ? `/admin/products/add_or_edit/${id}/` : form.getAttribute('action');
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                body: formData
+            });
+            const data = await res.json();
+
+            if (data.html) {
+                document.getElementById('products-section').outerHTML = data.html;
+                bindButtons();
+                resetForm();
+                return;
+            }
+
+            if (data.error) {
+                for (const [field, messages] of Object.entries(data.error)) {
+                    errorDiv.innerHTML += `<strong>${field}:</strong> ${messages.join(', ')}<br>`;
+                }
+            }
+        } catch (err) {
+            console.error('Error submitting form:', err);
+        }
+    };
+
+    cancelBtn.onclick = resetForm;
+
+    // Initial binding
+    bindButtons();
+});
+</script>
